@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+SCRIPT=`realpath $0`
+
+#readonly BASH_BINARY="$(which zsh)"
+readonly BASH_BINARY="$(which bash)"
+declare -x PREVIEW_ID="preview"
+
+declare -x TMP_FOLDER="/tmp/vimdu"
+mkdir -p $TMP_FOLDER
+
+function render_img {
+  img_path="${1}"
+  max_dith="${2}"
+  icat -w "${max_width}" "${img_path}"
+}
+
+function render_termpdf {
+  pdf_path="${3}"
+  termpddf "${pdf_path}"
+}
+
+function draw_preview {
+    if ! command -v icat &> /dev/null; then
+      echo "icat could not be found in your path,\nplease install it to display media content"
+      exit
+
+    elif ! command -v termpdf &> /dev/null; then
+      echo "termpdf could not be found in your path,\nplease install it to display pdf content"
+      exit
+    fi
+
+    if [[ "$1" == "imagepreview" ]]; then
+      render_img "${2}" "${5}" "${7}"
+
+    fi
+    #elif [[ "$1" == "pdfpreview" ]]; then
+      #path="${2##*/}"
+        #echo -e "Loading preview..\nFile: $path"
+        #[[ ! -f "${TMP_FOLDER}/${path}.png" ]] && pdftoppm -png -singlefile "$2" "${TMP_FOLDER}/${path}.png"
+        #clear
+        #render_at_size "${5}" "${6}" "${TMP_FOLDER}/${path}.png" "${7}"
+    #fi
+}
+
+function parse_options {
+    extension="${1##*.}"
+    case $extension in
+    jpg | png | jpeg | webp | svg)
+        draw_preview  imagepreview "$1" $2 $3 $4 $5 $6
+    ;;
+    #pdf | epub)
+        #draw_preview  pdfpreview "$1" $2 $3 $4 $5 $6
+    #;;
+    *)
+    echo -n "unknown file $1"
+    ;;
+    esac
+}
+
+parse_options "${@}"
+read
