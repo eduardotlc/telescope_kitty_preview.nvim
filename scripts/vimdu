@@ -21,7 +21,7 @@ function render_img {
 
 function render_termpdf {
   pdf_path="${1}"
-  termpdf "${pdf_path}"
+  termpdf.py "${pdf_path}"
 }
 
 function draw_preview {
@@ -40,7 +40,8 @@ function draw_preview {
 
     #fi
     elif [[ "$1" == "pdfpreview" ]]; then
-      render_termpdf "${2}" "${7}"
+      #render_termpdf "${2}" "${7}"
+      render_termpdf "~/Downloads/main.pdf" "${7}"
       #path="${2##*/}"
         #echo -e "Loading preview..\nFile: $path"
         #[[ ! -f "${TMP_FOLDER}/${path}.png" ]] && pdftoppm -png -singlefile "$2" "${TMP_FOLDER}/${path}.png"
