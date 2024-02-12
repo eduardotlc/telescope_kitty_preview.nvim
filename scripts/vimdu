@@ -11,7 +11,7 @@ mkdir -p $TMP_FOLDER
 
 function render_img {
   img_path="${1}"
-  max_dith="${2}"
+  max_width="${2}"
   icat -w "${max_width}" "${img_path}"
 }
 
