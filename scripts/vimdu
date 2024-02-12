@@ -2,8 +2,12 @@
 
 SCRIPT=`realpath $0`
 
-#readonly BASH_BINARY="$(which zsh)"
-readonly BASH_BINARY="$(which bash)"
+if [[ -v SHELL ]]; then
+  readonly BASH_BINARY="${SHELL}"
+else
+  readonly BASH_BINARY="$(which bash)"
+fi
+
 declare -x PREVIEW_ID="preview"
 
 declare -x TMP_FOLDER="/tmp/vimdu"
@@ -28,19 +32,21 @@ function draw_preview {
     elif ! command -v termpdf &> /dev/null; then
       echo "termpdf could not be found in your path,\nplease install it to display pdf content"
       exit
+
     fi
 
     if [[ "$1" == "imagepreview" ]]; then
       render_img "${2}" "${5}" "${7}"
 
-    fi
-    #elif [[ "$1" == "pdfpreview" ]]; then
+    #fi
+    elif [[ "$1" == "pdfpreview" ]]; then
+      render_pdf "${2}" "${7}"
       #path="${2##*/}"
         #echo -e "Loading preview..\nFile: $path"
         #[[ ! -f "${TMP_FOLDER}/${path}.png" ]] && pdftoppm -png -singlefile "$2" "${TMP_FOLDER}/${path}.png"
         #clear
         #render_at_size "${5}" "${6}" "${TMP_FOLDER}/${path}.png" "${7}"
-    #fi
+    fi
 }
 
 function parse_options {
@@ -49,9 +55,9 @@ function parse_options {
     jpg | png | jpeg | webp | svg)
         draw_preview  imagepreview "$1" $2 $3 $4 $5 $6
     ;;
-    #pdf | epub)
-        #draw_preview  pdfpreview "$1" $2 $3 $4 $5 $6
-    #;;
+    pdf | epub)
+        draw_preview  pdfpreview "$1" $2 $3 $4 $5 $6
+    ;;
     *)
     echo -n "unknown file $1"
     ;;
