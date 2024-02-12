@@ -20,7 +20,7 @@ function render_img {
 }
 
 function render_termpdf {
-  pdf_path="${3}"
+  pdf_path="${1}"
   termpdf "${pdf_path}"
 }
 
