@@ -27,3 +27,7 @@ Add to your init.vim
 ```vim
 Plug 'eduardotlc/telescope-du-preview.nvim'
 ```
+
+## Credits
+
+based on [telescope-media-preview](https://github.com/nvim-telescope/telescope-media-files.nvim)
