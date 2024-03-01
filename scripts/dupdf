@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+SCRIPT=`realpath $0`
+
+readonly BASH_BINARY="$(which bash)"
+declare -x PREVIEW_ID="preview"
+
+declare -x TMP_FOLDER="/tmp/vimg"
+mkdir -p $TMP_FOLDER
+
+function kitty_preview {
+  if [[ $# -ne 1 ]]; then
+    >&2 echo "usage: $0 FILENAME"
+    exit 1
+  fi
+
+  file=${1/#\~\//$HOME/}
+  type=$(file --dereference --mime -- "$file")
+
+  if [[ ! $type =~ image/ ]]; then
+    if [[ $type =~ =binary ]]; then
+      file "$1"
+      exit
+    fi
+
+    # Sometimes bat is installed as batcat.
+    if command -v batcat > /dev/null; then
+      batname="batcat"
+    elif command -v bat > /dev/null; then
+      batname="bat"
+    else
+      cat "$1"
+      exit
+    fi
+
+    ${batname} --style="${BAT_STYLE:-numbers}" --color=always --pager=never -- "$file"
+    exit
+  fi
+
+  dim=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}
+  if [[ $dim = x ]]; then
+    dim=$(stty size < /dev/tty | awk '{print $2 "x" $1}')
+  elif ! [[ $KITTY_WINDOW_ID ]] && (( FZF_PREVIEW_TOP + FZF_PREVIEW_LINES == $(stty size < /dev/tty | awk '{print $1}') )); then
+    # Avoid scrolling issue when the Sixel image touches the bottom of the screen
+    # * https://github.com/junegunn/fzf/issues/2544
+    dim=${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES - 1))
+  fi
+
+  # 1. Use kitty icat on kitty terminal
+  if [[ $KITTY_WINDOW_ID ]]; then
+    # 1. 'memory' is the fastest option but if you want the image to be scrollable,
+    #    you have to use 'stream'.
+    #
+    # 2. The last line of the output is the ANSI reset code without newline.
+    #    This confuses fzf and makes it render scroll offset indicator.
+    #    So we remove the last line and append the reset code to its previous line.
+    kitty icat --clear --transfer-mode=memory --unicode-placeholder --stdin=no --place="$dim@0x0" "$file" | sed '$d' | sed $'$s/$/\e[m/'
+
+  # 2. Use chafa with Sixel output
+  elif command -v chafa > /dev/null; then
+    chafa -f sixel -s "$dim" "$file"
+    # Add a new line character so that fzf can display multiple images in the preview window
+    echo
+
+  # 3. If chafa is not found but imgcat is available, use it on iTerm2
+  elif command -v imgcat > /dev/null; then
+    # NOTE: We should use https://iterm2.com/utilities/it2check to check if the
+    # user is running iTerm2. But for the sake of simplicity, we just assume
+    # that's the case here.
+    imgcat -W "${dim%%x*}" -H "${dim##*x}" "$file"
+
+  # 4. Cannot find any suitable method to preview the image
+  else
+    file "$file"
+  fi
+}
+
+
+function render_at_size {
+  max_width="${1}"
+  max_height="${2}"
+  img_path="${3}"
+
+  # animation is turned off as it does werid things with the terminal output
+  chafa --animate=off --center=on --clear --size "${max_width}x${max_height}" "${img_path}"
+}
+
+function draw_preview {
+    if ! command -v chafa &> /dev/null; then
+      echo "chafa could not be found in your path,\nplease install it to display media content"
+      exit
+    fi
+
+    if [[ "$1" == "imagepreview" ]]; then
+      kitty_preview "${2}"
+      #render_at_size "${5}" "${6}" "${2}" "${7}"
+      # viu -b -w ${5} -h ${6} "${2}"
+
+    elif [[ "$1" == "pdfpreview" ]]; then
+      path="${2##*/}"
+        echo -e "Loading preview..\nFile: $path"
+        #[[ ! -f "${TMP_FOLDER}/${path}.png" ]] && pdftoppm -png -singlefile "$2" "${TMP_FOLDER}/${path}"
+        [[ ! -f "${TMP_FOLDER}/${path}.png" ]] && pdftoppm -png -f 1 -l 2 "$2" "${TMP_FOLDER}/${2}"
+        if [ -f "${TMP_FOLDER}/${path}-1.png" ]; then
+          montage "${TMP_FOLDER}/${path}-1.png" "${TMP_FOLDER}/${path}-2.png" -tile 2x1 -geometry +0+0 "${TMP_FOLDER}/${path}.png"
+        elif [ -f "${TMP_FOLDER}/${path}-01.png" ]; then
+          montage "${TMP_FOLDER}/${path}-01.png" "${TMP_FOLDER}/${path}-02.png" -tile 2x1 -geometry +0+0 "${TMP_FOLDER}/${path}.png"
+        elif [ -f "${TMP_FOLDER}/${path}-001.png" ]; then
+          montage "${TMP_FOLDER}/${path}-001.png" "${TMP_FOLDER}/${path}-002.png" -tile 2x1 -geometry +0+0 "${TMP_FOLDER}/${path}.png"
+        fi
+        #render_at_size "${3}" "${4}" "${TMP_FOLDER}/${path}.png"
+        kitty_preview "${TMP_FOLDER}/${path}.png"
+    fi
+}
+
+function parse_options {
+    extension="${1##*.}"
+    case $extension in
+    txt | md)
+        pygmentize -O style=dracula -f terminal256 -g "$1"
+        ;;
+    jpg | png | jpeg | webp | svg)
+        #draw_preview  imagepreview "$1" $2 $3 $4 $5 $6
+        draw_preview  imagepreview "$1"
+        ;;
+    pdf | epub)
+        #draw_preview  pdfpreview "$1" $2 $3
+        draw_preview  pdfpreview "$1"
+        ;;
+    *)
+        echo -n "unknown file $1"
+        ;;
+    esac
+}
+
+parse_options "${@}"
+read

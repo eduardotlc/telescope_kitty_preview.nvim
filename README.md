@@ -4,23 +4,23 @@
 
 *If interested in this plugin, star it to see updates, until it is functioning*
 
-Kitty pdf and image preview telescope extension
+Kitty pdf, image and other formats preview in FZF and telescope.
 
-Renders preview through termpdf and icat
+Renders preview through chafa, icat, imagemagick, pdftoppm and pygmentize.
 
-Sioyek pdf viewer open pdf, Zotero local storage browser and bibtex browser
+Sioyek pdf viewer open pdf, Zotero local storage browser and bibtex browser.
 
 ## Requirements
 
-- kitty
+- [kitty](https://github.com/kovidgoyal/kitty)
 
-- termpdf
+- [icat](https://github.com/atextor/icat)
 
-- icat
+- [fzf](https://github.com/junegunn/fzf)
 
-- fzf
+- [ImageMagick](https://github.com/ImageMagick/ImageMagick)
 
-- fd
+- [Pygmentize](https://github.com/dedalozzo/pygmentize)
 
 ### Plugins
 
