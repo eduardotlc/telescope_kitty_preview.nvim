@@ -1,17 +1,22 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
-SCRIPT=`realpath $0`
+SCRIPT=$(realpath "$0")
 
 if [[ -v SHELL ]]; then
   readonly BASH_BINARY="${SHELL}"
 else
-  readonly BASH_BINARY="$(which bash)"
+  WHICH_BASH_BINARY="$(which bash)"
+  readonly BASH_BINARY="${WHICH_BASH_BINARY}"
 fi
 
 declare -x PREVIEW_ID="preview"
-
-declare -x TMP_FOLDER="/tmp/vimdu"
+declare -x TMP_FOLDER="/tmp/vimg"
 mkdir -p $TMP_FOLDER
+
+if ! command -v icat &> /dev/null; then
+  echo -e "icat could not be found in your path,\nplease install it to display media content"
+  exit
+fi
 
 function render_img {
   img_path="${1}"
@@ -66,3 +71,4 @@ function parse_options {
 
 parse_options "${@}"
 read
+# vim:ft=sh

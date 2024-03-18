@@ -1,26 +1,55 @@
 # Telescope-du-preview.nvim
 
+**Kitty PDF, PNG, SVG and other formats preview in FZF and telescope.**
+
+|        License           |    Update       |
+| :----------------------: | :-------------: |
+|  [![mitbadge]][license]  |  ![lastupdate]  |
+
+[mitbadge]: ./images/badge_mit.svg
+[lastupdate]: ./images/badge_update.svg
+[license]: https://opensource.org/licenses/MIT
+
+<eduardotcampos@usp.br> **[2024]**
+
 *Current under developement, still not working, do not install this Plugin*
 
-*If interested in this plugin, star it to see updates, until it is functioning*
+*If interested in this plugin, star it to follow future updates, until it is properly functioning*
 
-Kitty pdf, image and other formats preview in FZF and telescope.
 
-Renders preview through chafa, icat, imagemagick, pdftoppm and pygmentize.
+Renders preview through [icat](https://github.com/atextor/icat), imagemagick, [pdftoppm](https://poppler.freedesktop.org/) and pygmentize.
 
-Sioyek pdf viewer open pdf, Zotero local storage browser and bibtex browser.
+Currently, being primary developed on neovim/telescope and kitty terminal. Despite that, other terminal emulators are schemed for future support,
+like iterm and gnome-terminal, though their support is not this project main focus.
+
+If you desire contributing for this other terminals support, or any other code improvement, fell free to submit a pull request, your help
+will be highly appreciated.
 
 ## Requirements
 
 - [kitty](https://github.com/kovidgoyal/kitty)
 
-- [icat](https://github.com/atextor/icat)
-
 - [fzf](https://github.com/junegunn/fzf)
+
+- [poppler](https://poppler.freedesktop.org/)
+
+- [icat](https://github.com/atextor/icat)
 
 - [ImageMagick](https://github.com/ImageMagick/ImageMagick)
 
 - [Pygmentize](https://github.com/dedalozzo/pygmentize)
+
+### Fedora Linux
+
+```bash
+sudo dnf install fzf gawk kitty poppler
+```
+
+### Debian and Ubuntu Linux
+
+```bash
+sudo apt install fzf gawk kitty libpoppler-dev
+```
 
 ### Plugins
 
@@ -65,6 +94,17 @@ For example, if you add the above code to a config.lua file, on your
 lua require("config")
 ```
 
+## Features
+
+|  **Preview**   | Kitty | Telescope Neovim | Gnome-terminal | iterm |
+| :-----------:  |:-----:|:----------------:|:--------------:|:-----:|
+| **SVG**        |   ✅  |        ✕         |        ✕       |   ✕   |
+| **PNG**        |   ✅  |        ✕         |        ✕       |   ✕   |
+| **PDF**        |   ✅  |        ✕         |        ✕       |   ✕   |
+| **text files** |   ✅  |        ✕         |        ✕       |   ✕   |
+| **epub**       |   ✕   |        ✕         |        ✕       |   ✕   |
+
+
 ## Credits
 
 based on [telescope-media-preview](https://github.com/nvim-telescope/telescope-media-files.nvim)
@@ -72,8 +112,10 @@ based on [telescope-media-preview](https://github.com/nvim-telescope/telescope-m
 
 ## TODO
 
-- Implement sioyek pdf open
+- [ ]  Implement sioyek PDF open
 
-- Implement Zotero browser
+- [ ] Implement Zotero browser
 
-- Implement bibtex browser
+- [ ] Implement bibtex browser
+
+- [ ] Neovim checkhealth
