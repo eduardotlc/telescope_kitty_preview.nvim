@@ -32,7 +32,7 @@ M.media_preview = defaulter(function(opts)
         return {"echo", ""}
       end
       return {
-        M.base_directory .. '/scripts/vimdu' ,
+        M.base_directory .. '/scripts/kitty_telescope_preview.sh' ,
         string.format([[%s/%s]], opts.cwd, tmp_table[1]),
         preview.col ,
         preview.line + 1 ,
@@ -130,7 +130,7 @@ end
 
 return require('telescope').register_extension {
   setup = function(ext_config)
-    filetypes = ext_config.filetypes or {"png", "jpg", "gif", "mp4", "webm", "pdf"}
+    filetypes = ext_config.filetypes or {"png", "jpg", "gif", "mp4", "webm", "pdf", "svg"}
     find_cmd = ext_config.find_cmd or "fd"
     image_stretch = ext_config.image_stretch or 250
   end,
