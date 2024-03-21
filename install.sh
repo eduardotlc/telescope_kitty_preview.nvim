@@ -22,7 +22,6 @@ mkdir -p "${DUFZF_CONFIG_DIR}"
 
 if [ -f "${DUFZF_CONFIG_DIR}/kitty_telescope_preview.config" ]; then
     echo -e "Config file already exists at \e[1;36m ${DUFZF_CONFIG_DIR}/kitty_telescope_preview.config \e[0m\n"
-    return
 fi
 
 cp -p "${BASEDIR}/kitty_telescope_preview.config" "${DUFZF_CONFIG_DIR}"
@@ -38,8 +37,7 @@ fi
 
 if [ -f "${DUFZF_INSTALL_DIR}/kitty_telescope_preview.config" ]; then
     echo -e "Config file already exists at \e[1;36m ${DUFZF_CONFIG_DIR}/kitty_telescope_preview.config \e[0m\n"
-    return
 fi
 echo -e "Installing to \e[1;36m ${DUFZF_INSTALL_DIR} \e[0m\n"
 
-cp -p -U "${BASEDIR}/kitty_telescope_widget.sh" "${BASEDIR}/kitty_telescope_preview/kitty_telescope_preview.sh" "${DUFZF_INSTALL_DIR}"
+cp -p -u "${BASEDIR}/scripts/kitty_telescope_widgets.sh" "${BASEDIR}/scripts/kitty_telescope_preview.sh" "${DUFZF_INSTALL_DIR}"

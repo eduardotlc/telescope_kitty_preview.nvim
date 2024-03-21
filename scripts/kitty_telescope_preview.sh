@@ -6,7 +6,7 @@ declare -x TMP_FOLDER="/tmp/vimg"
 mkdir -p $TMP_FOLDER
 
 #KITTY PREVIEW
-function kitty_preview {
+function du_kitty_preview {
   if [[ $# -ne 1 ]]; then
     >&2 echo "usage: $0 FILENAME"
     exit 1
@@ -40,7 +40,7 @@ function kitty_preview {
 }
 
 # Directory preview function for fzf
-dir_preview() {
+du_dir_preview() {
   # Ensure the target is a directory
   if [[ -d "$1" ]]; then
     # Display directory size
@@ -49,13 +49,13 @@ dir_preview() {
 
     # List up to the first 10 files in the directory
     echo "Files:"
-    ls -lAh "$1" | head -n 11
+    ls -lAh --color=always "$1" | head -n 11
   fi
 }
 
 
 #DRAW PREVIEW
-function draw_preview {
+function du_draw_preview {
     if ! command -v pdftoppm &> /dev/null; then
       echo -e "pdftoppm could not be found in your path,\nplease install it to display media content"
       exit
@@ -72,7 +72,7 @@ function draw_preview {
     fi
 
     if [[ "$1" == "imagepreview" ]]; then
-      kitty_preview "${2}"
+      du_kitty_preview "${2}"
 
     elif [[ "$1" == "pdfpreview" ]]; then
         path="${2##*/}"
@@ -90,7 +90,7 @@ function draw_preview {
             montage "${TMP_FOLDER}/${path}-001.png" "${TMP_FOLDER}/${path}-002.png" -tile 2x1 -geometry +0+0 "${TMP_FOLDER}/${path}.png"
           fi
         fi
-        kitty_preview "${TMP_FOLDER}/${path}.png"
+        du_kitty_preview "${TMP_FOLDER}/${path}.png"
     fi
 }
 
@@ -102,18 +102,21 @@ function parse_options {
       pygmentize -O style=dracula -f terminal256 -g "$1"
       ;;
     jpg | png | jpeg | webp | svg)
-      draw_preview  imagepreview "$1"
+      du_draw_preview  imagepreview "$1"
       ;;
     pdf | epub)
-      draw_preview  pdfpreview "$1"
+      du_draw_preview  pdfpreview "$1"
       ;;
     *)
       filetype=$(file --mime "$1" | grep -oP 'charset=\K[^;]+')
       if [[ -d "$1" ]]; then
-        echo -e "Total size:\n"
+        echo -e "\e[1;36mTotal size:\e[0m\n"
         du -sh "$1" 2> /dev/null
-        echo -e "Files:\n"
-        ls -lAh "$1" | head -n 11
+        echo -e "\n"
+        echo -e "\e[1;35mFiles:\e[0m\n"
+        # Uncomment following line for more detailed file listing
+        #ƛ ls -F -C -o -q -h --color=always | head -n 11
+        ls -F -C -h --color=always "$1" | head -n 18
         return
       elif [ "$filetype" == binary ]; then
         echo -e "\n"
