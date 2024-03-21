@@ -39,6 +39,21 @@ function kitty_preview {
   fi
 }
 
+# Directory preview function for fzf
+dir_preview() {
+  # Ensure the target is a directory
+  if [[ -d "$1" ]]; then
+    # Display directory size
+    echo "Total size:"
+    du -sh "$1" 2> /dev/null
+
+    # List up to the first 10 files in the directory
+    echo "Files:"
+    ls -lAh "$1" | head -n 11
+  fi
+}
+
+
 #DRAW PREVIEW
 function draw_preview {
     if ! command -v pdftoppm &> /dev/null; then
@@ -93,12 +108,14 @@ function parse_options {
       draw_preview  pdfpreview "$1"
       ;;
     *)
-      # If the file don't have extension, the extension variable will correspond to
-      # the file name.
-      # Checking if this file is in binary format or not, since pevewing binary files
-      # should be avoided and may cause malfunction in fzf.
       filetype=$(file --mime "$1" | grep -oP 'charset=\K[^;]+')
-      if [ "$filetype" == binary ]; then
+      if [[ -d "$1" ]]; then
+        echo -e "Total size:\n"
+        du -sh "$1" 2> /dev/null
+        echo -e "Files:\n"
+        ls -lAh "$1" | head -n 11
+        return
+      elif [ "$filetype" == binary ]; then
         echo -e "\n"
         echo -e "\e[1;31mFile is Binary, and will not be read. \e[0m"
         echo -e "\n"

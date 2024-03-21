@@ -63,6 +63,18 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 ```
 
+#### Markdown utils
+
+To use the FZF markdown utils and funtions, it is required:
+
+```neovim
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
+```
+
+```bash
+npm install -g npx
+```
+
 ## Installation
 
 [Vim-plug](https://github.com/junegunn/vim-plug)
