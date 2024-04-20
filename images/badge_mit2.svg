@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="136" height="20">
+    <linearGradient id="b" x2="0" y2="100%">
+        <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+        <stop offset="1" stop-opacity=".1"/>
+    </linearGradient>
+    <mask id="anybadge_1">
+        <rect width="136" height="20" rx="3" fill="#fff"/>
+    </mask>
+    <g mask="url(#anybadge_1)">
+        <path fill="#555" d="M0 0h57v20H0z"/>
+        <path fill="#7fe6ab" d="M57 0h79v20H57z"/>
+        <path fill="url(#b)" d="M0 0h136v20H0z"/>
+    </g>
+    <g fill="#000000" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+        <text x="29.5" y="15" fill="#010101" fill-opacity=".3">Updated</text>
+        <text x="28.5" y="14">Updated</text>
+    </g>
+    <g fill="#000000" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+        <text x="97.5" y="15" fill="#010101" fill-opacity=".3">March 2024</text>
+        <text x="96.5" y="14">March 2024</text>
+    </g>
+</svg>

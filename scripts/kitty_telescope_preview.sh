@@ -1,137 +1,114 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
-#INITIAL VARIABLES
-declare -x PREVIEW_ID="preview"
+# >> INITIAL VARIABLES
+
 declare -x TMP_FOLDER="/tmp/vimg"
 mkdir -p $TMP_FOLDER
 
-#KITTY PREVIEW
-function du_kitty_preview {
-  if [[ $# -ne 1 ]]; then
-    >&2 echo "usage: $0 FILENAME"
-    exit 1
-  fi
+# >> PREVIEW FUNCTIONS
 
-  file=${1/#\~\//$HOME/}
+## >> Img Preview
+kitty_telescope_img_preview() {
+  local img_wh=$(identify -format '%w %h' "${1}")
+  echo -e "Widht  x  Height \n"
+  echo -e "\n\e[1;33m ${img_wh} \e[0m\n"
+  kitty icat --transfer-mode=stream --unicode-placeholder --stdin=no --place="${2}@0x0" "${1}"
+}
 
-  # dim defines the fzf preview window dimensions
-  dim=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}
+## >> Dir Preview
+kitty_telescope_dir_preview() {
+  echo -e "\e[1;36mSize\e[0m"
+  echo -e "\e[1;36m----\e[0m\n"
+  du -sh "${1}"
+  echo -e "\n"
+  echo -e "\e[1;35mFiles\e[0m"
+  echo -e "\e[1;35m-----\e[0m\n"
+  ls --almost-all --color=always --hide-control-chars "${filecomp}" | tail --lines=+2
+}
+
+## >> PDF Preview
+kitty_telescope_pdf_preview() {
+  local page_num=1
+  update_preview() {
+    local ktpdf="$1"
+    local ktpg="$2"
+    # pdftoppm "${filecomp}" "${TMP_FOLDER}/${filecomp}-${page_num}" -f "$page" -l "$page" -png
+    pdftoppm "$pdf" "${TMP_FOLDER}/${ktpg}" -f "$ktpg" -l "$ktpg" -png
+    # kitty icat --clear --transfer-mode=stream --unicode-placeholder --stdin=no --place="${dim}@0x0" "$temp_dir/page-1.png"
+    kitty icat --clear --transfer-mode=memory --unicode-placeholder --stdin=no --place="${dim}@0x0" "${TMP_FOLDER}/${ktpg}.png"
+  }
+
+  echo -e "Loading preview..\nFile: ${filecomp}"
+  echo "TEEEEEEE"
+  bindkey -s '\ez' 'echo "${TMP_FOLDER}"\n'
+  bindkey -s '\eg' 'echo "${TMP_FOLDER}"\n'
+  bindkey '\eq' fzf-history-widget
+  read -k
+  # rm -rf $(find "${TMP_FOLDER}" -type f -name "*-*.png")
+}
+
+# >> MAIN FUNCTION
+
+kitty_telescope_parse_options() {
+  # Extracts the exntension part of the file full string
+  local extension="${1##*.}"
+  # Attributing complete file string variable
+  local filecomp="${1#*: }"
+  # Attributing dimensions of the screen if FZF has defined
+  local dim=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}
+  # If both above FZF variables aren't defined:
   if [[ $dim = x ]]; then
-    dim=$(stty size < /dev/tty | awk '{print $2 "x" $1}')
-  elif ! [[ $KITTY_WINDOW_ID ]] && (( FZF_PREVIEW_TOP + FZF_PREVIEW_LINES == $(stty size < /dev/tty | awk '{print $1}') )); then
-    # Avoid scrolling issue when the Sixel image touches the bottom of the screen
-    # * https://github.com/junegunn/fzf/issues/2544
-    dim=${FZF_PREVIEW_COLUMNS}x$((FZF_PREVIEW_LINES - 1))
+    # Defines diametter by the stty command
+    local dim=$(stty size  | awk '{print $2 "x" $1}')
   fi
 
-  # 1. Use kitty icat on kitty terminal
-  if [[ $KITTY_WINDOW_ID ]]; then
-    # 1. 'memory' is the fastest option but if you want the image to be scrollable,
-    #    you have to use 'stream'.
-    #
-    # 2. The last line of the output is the ANSI reset code without newline.
-    #    This confuses fzf and makes it render scroll offset indicator.
-    #    So we remove the last line and append the reset code to its previous line.
-    kitty icat --clear --transfer-mode=stream --unicode-placeholder --stdin=no --place="$dim@0x0" "$file" | sed '$d' | sed $'$s/$/\e[m/'
-
-  else
-    file "$file"
-  fi
-}
-
-# Directory preview function for fzf
-du_dir_preview() {
-  # Ensure the target is a directory
-  if [[ -d "$1" ]]; then
-    # Display directory size
-    echo "Total size:"
-    du -sh "$1" 2> /dev/null
-
-    # List up to the first 10 files in the directory
-    echo "Files:"
-    ls -lAh --color=always "$1" | head -n 11
-  fi
-}
-
-
-#DRAW PREVIEW
-function du_draw_preview {
-    if ! command -v pdftoppm &> /dev/null; then
-      echo -e "pdftoppm could not be found in your path,\nplease install it to display media content"
-      exit
-    fi
-
-    if ! command -v icat &> /dev/null; then
-      echo -e "icat could not be found in your path,\nplease install it to display media content"
-      exit
-    fi
-
-    if ! command -v awk &> /dev/null; then
-      echo -e "awk could not be found in your path,\nplease install it to display media content"
-      exit
-    fi
-
-    if [[ "$1" == "imagepreview" ]]; then
-      du_kitty_preview "${2}"
-
-    elif [[ "$1" == "pdfpreview" ]]; then
-        path="${2##*/}"
-        total_pages=$(pdfinfo "${2}" | grep 'Pages' | awk '{print $2}')
-        echo -e "Loading preview..\nFile: $path"
-        if [ "$total_pages" -le 1 ]; then
-          [[ ! -f "${TMP_FOLDER}/${path}.png" ]] && pdftoppm -png -r 300 -singlefile "$2" "${TMP_FOLDER}/${path}"
-        else
-          [[ ! -f "${TMP_FOLDER}/${path}.png" ]] && pdftoppm -png -r 300 -f 1 -l 2 "$2" "${TMP_FOLDER}/${path}"
-          if [ "$total_pages" -gt 1 ] && [ "$total_pages" -le 10 ]; then
-            montage "${TMP_FOLDER}/${path}-1.png" "${TMP_FOLDER}/${path}-2.png" -tile 2x1 -geometry +0+0 "${TMP_FOLDER}/${path}.png"
-          elif [ "$total_pages" -gt 10 ] && [ "$total_pages" -le 100 ]; then
-            montage "${TMP_FOLDER}/${path}-01.png" "${TMP_FOLDER}/${path}-02.png" -tile 2x1 -geometry +0+0 "${TMP_FOLDER}/${path}.png"
-          elif [ "$total_pages" -gt 100 ] && [ "$total_pages" -le 1000 ]; then
-            montage "${TMP_FOLDER}/${path}-001.png" "${TMP_FOLDER}/${path}-002.png" -tile 2x1 -geometry +0+0 "${TMP_FOLDER}/${path}.png"
-          fi
-        fi
-        du_kitty_preview "${TMP_FOLDER}/${path}.png"
-    fi
-}
-
-#MAIN FUNCTION
-function parse_options {
-  extension="${1##*.}"
-  case $extension in
-    txt | md | py | sh | json | css | desktop | tex | lua | vim)
-      pygmentize -O style=dracula -f terminal256 -g "$1"
+  # Defining the preview command to execute based on file extension
+  case "${extension}" in
+    # Text like files
+    txt | md | py | sh | json | css | desktop | tex | lua | vim | conf)
+      # Simple pygmentize output from the file
+      pygmentize -O style=dracula -f terminal256 -g "${filecomp}"
       ;;
+    # Image like files
     jpg | png | jpeg | webp | svg)
-      du_draw_preview  imagepreview "$1"
+      kitty_telescope_img_preview "${filecomp}" "${dim}"
       ;;
+    # Documents like files
     pdf | epub)
-      du_draw_preview  pdfpreview "$1"
+      kitty_telescope_pdf_preview "{filecomp}"
+      # du_live_pdf_preview "${filecomp}"
+      ;;
+    # Other files
+    du)
+      echo "teste"
       ;;
     *)
-      filetype=$(file --mime "$1" | grep -oP 'charset=\K[^;]+')
-      if [[ -d "$1" ]]; then
-        echo -e "\e[1;36mTotal size:\e[0m\n"
-        du -sh "$1" 2> /dev/null
-        echo -e "\n"
-        echo -e "\e[1;35mFiles:\e[0m\n"
-        # Uncomment following line for more detailed file listing
-        #ƛ ls -F -C -o -q -h --color=always | head -n 11
-        ls -F -C -h --color=always "$1" | head -n 18
-        return
-      elif [ "$filetype" == binary ]; then
-        echo -e "\n"
-        echo -e "\e[1;31mFile is Binary, and will not be read. \e[0m"
-        echo -e "\n"
-        return
+      # If file is a directory
+      if [[ -d "${filecomp}" ]]; then
+        kitty_telescope_dir_preview "${filecomp}"
+        # return
       else
-        echo -e "\n"
-        echo -e "\e[1;31mUnrecognized Extension \e[0m"
-        echo -e "\n"
-        pygmentize -O style=dracula -f terminal256 -g "$1"
+        # Check if the file is a binary
+        filetype=$(file --mime "${filecomp}" | grep -oP 'charset=\K[^;]+')
+        # If the file is a binary
+        if [[ $filetype == binary ]]; then
+          echo -e "\n"
+          echo -e "\e[1;31mFile is Binary, and will not be read. \e[0m"
+          echo -e "\n"
+          # return
+        # Other cases, a warning message about unrecognized extension will be displayed,
+        #  and a simple pygmentize file output will be displayed
+        else
+          echo -e "\n"
+          echo -e "\e[1;31mUnrecognized Extension \e[0m"
+          echo -e "\n"
+          pygmentize -O style=dracula -f terminal256 -g "${filecomp}"
+          # return
+        fi
       fi
       ;;
   esac
 }
 
-parse_options "${@}"
+kitty_telescope_parse_options "${@}"
 read -r

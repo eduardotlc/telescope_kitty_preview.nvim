@@ -2,13 +2,13 @@
 
 **Kitty PDF, PNG, SVG and other formats preview in FZF and telescope.**
 
-|        License           |    Update       |
-| :----------------------: | :-------------: |
-|  [![mitbadge]][license]  |  ![lastupdate]  |
 
-[mitbadge]: ./images/badge_mit.svg
-[lastupdate]: ./images/badge_update.svg
+[![mitbadge]][license] &nbsp;&nbsp;&nbsp; [![Updated - April 2024][updatebadge]](https://)
+
+[mitbadge]: https://img.shields.io/badge/License-MIT-2a7a61?style=for-the-badge
 [license]: https://opensource.org/licenses/MIT
+[updatebadge]: https://img.shields.io/badge/Updated-April_2024-4a4da0?style=for-the-badge
+
 
 <eduardotcampos@usp.br> **[2024]**
 
@@ -22,8 +22,32 @@ Renders preview through [icat](https://github.com/atextor/icat), imagemagick, [p
 Currently, being primary developed on neovim/telescope and kitty terminal. Despite that, other terminal emulators are schemed for future support,
 like iterm and gnome-terminal, though their support is not this project main focus.
 
-If you desire contributing for this other terminals support, or any other code improvement, fell free to submit a pull request, your help
+If you desire contributing for this other terminals support, or any other code improve, fell free to submit a pull request, your help
 will be highly appreciated.
+
+
+1. [Requirements](#requirements)
+
+    1.1 [Fedora](#fedora-linux)
+
+    1.2 [Debian and Ubuntu](#debian-and-ubuntu-linux)
+
+    1.3 [Plugins](#plugins)
+        
+      1.3.1 [Markdown utils](#markdown-utils)
+
+2. [Installation](#installation)
+
+3. [Setup](#setup)
+
+4. [Configuration](#configuration)
+
+5. [Features](#features)
+
+6. [Credits](#credits)
+
+7. [TODO](#todo)
+
 
 ## Requirements
 
@@ -85,7 +109,9 @@ Add to your init.vim
 Plug 'eduardotlc/telescope-du-preview.nvim'
 ```
 
-## Setup (Obrigatory)
+## Setup
+
+**(Obrigatory)**
 
 On a lua file required by your init.vim:
 
@@ -106,15 +132,37 @@ For example, if you add the above code to a config.lua file, on your
 lua require("config")
 ```
 
+## Configuration
+
+- Configuration folder and files are created during the exec of install.sh
+
+- 
+
 ## Features
 
-|  **Preview**   | Kitty | Telescope Neovim | Gnome-terminal | iterm |
-| :-----------:  |:-----:|:----------------:|:--------------:|:-----:|
-| **SVG**        |   ✅  |        ✕         |        ✕       |   ✕   |
-| **PNG**        |   ✅  |        ✕         |        ✕       |   ✕   |
-| **PDF**        |   ✅  |        ✕         |        ✕       |   ✕   |
-| **text files** |   ✅  |        ✕         |        ✕       |   ✕   |
-| **epub**       |   ✕   |        ✕         |        ✕       |   ✕   |
+|  **Preview**     | Kitty | Telescope Neovim | Gnome-terminal | iterm |
+| :-----------:    |:-----:|:----------------:|:--------------:|:-----:|
+| **SVG**          |   ✅  |        ✕         |        ✕       |   ✕   |
+| **PNG**          |   ✅  |        ✕         |        ✕       |   ✕   |
+| **PDF**          |   ✅  |        ✕         |        ✕       |   ✕   |
+| **Text Files**   |   ✅  |        ✕         |        ✕       |   ✕   |
+| **Todo.txt** |   ✕   |        ✕         |        ✕       |   ✕   |
+| **epub**         |   ✕   |        ✕         |        ✕       |   ✕   |
+| **Bib Managing** |   ✕   |        ✕         |        ✕       |   ✕   |
+| **Zotero Cites** |   ✕   |        ✕         |        ✕       |   ✕   |
+
+### Environment Variables
+
+- KITTY_TELESCOPE_BOOKMARKS
+
+Bookmarks storing file path, defaults to ~/.kitty_bookmarks,
+needs to be formatted like:
+
+```bash
+Name: /file/base/path
+Downloads: ~/Downloads
+Desktop: /usr/local/share/applications
+```
 
 
 ## Credits
@@ -124,10 +172,16 @@ based on [telescope-media-preview](https://github.com/nvim-telescope/telescope-m
 
 ## TODO
 
-- [ ]  Implement sioyek PDF open
+- [ ] Implement sioyek PDF open
 
 - [ ] Implement Zotero browser
 
 - [ ] Implement bibtex browser
 
 - [ ] Neovim checkhealth
+
+- [ ] Terminal and nvim fzf dictionary consulting and spell checking
+
+- [ ] Bibtex managing and citing
+
+- [ ] Zotero citing
